@@ -37,6 +37,11 @@ class Pais(BaseModel):
         db_column = "paiemail",
         null = False
     )
+    paisenha = models.CharField(
+        db_column = 'paisenha',
+        max_length= 255,
+        null= False
+    )
 
 
 class Aluno(BaseModel):
@@ -56,7 +61,7 @@ class Aluno(BaseModel):
     )
     alusenha = models.CharField(
         db_column = "alusenha",
-        max_length = 60,
+        max_length = 255,
         null = False,
     )
     alumatricula = models.CharField(
@@ -79,13 +84,19 @@ class Nutricionista(BaseModel):
         null = False,
         primary_key= True
     )
+    nutnome = models.CharField(
+        db_column = 'nutnome',
+        max_length = 60,
+        null = False
+    )
     nutemail = models.EmailField(
         db_column = "nutemail",
         null = False,
     )
     nutsenha = models.CharField(
         db_column = 'nutsenha',
-        null = False
+        null = False,
+        max_length = 255
     )
 
 
@@ -178,7 +189,7 @@ class Restricoes_alimentares(BaseModel):
         primary_key= True,
         null = False
     )
-    resali_alucodigo = models.ForeignKey(
+    resali_alicodigo = models.ForeignKey(
         Alergia,
         db_column = 'resali_alecodigo',
         null = False,
@@ -250,13 +261,27 @@ class Cardapio(BaseModel):
         db_column = 'cardata',
         null = False
     )
-    carrefcodigo = models.ForeignKey(
-        Refeicao,
+    carrefeicoes = models.ManyToManyField(
+        Refeicao, 
+        through='Cardapio_Refeicao'
+        )
+
+class Cardapio_refeicao(BaseModel):
+    carrefcodigo = models.BigAutoField(
         db_column = 'carrefcodigo',
         null = False,
-        on_delete= models.PROTECT
+        primary_key= True
     )
-
+    carref_refcodigo = models.ForeignKey(
+        Refeicao,
+        db_column = 'carref_refcodigo',
+        on_delete = models.PROTECT
+    )
+    carref_carcodigo = models.ForeignKey(
+        Cardapio,
+        db_column = 'carref_carcodigo',
+        on_delete = models.PROTECT
+    )
 
 
 

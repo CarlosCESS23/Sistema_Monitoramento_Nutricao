@@ -1,0 +1,42 @@
+
+#Configuração do nosso banco de dados PostgreSQL
+services:
+  db:
+    image: postgres:15
+    container_name: merenda_db
+    environment:
+      - POSTGRES_USER=merenda
+      - POSTGRES_PASSWORD=merenda
+      - POSTGRES_DB=merenda
+    ports:
+      - "5434:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: always
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U merenda -d merenda"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+# -----------------------Finalização do Banco de Dados-----------------------
+
+# Configuração do nosso Back-End Django
+# backend:
+#   build: ./backend 
+#   container_name: merenda_backend
+#   env_file:
+#     - ./backend/.env
+#   ports:
+#     - "9000:8000"
+#   volumes:
+#     -uploads:/app/uploads
+#   depends_on:
+#     db:
+#       condition: service_healthy
+#   restart:
+#     - unless-stopped
+
+volumes:
+  postgres_data:
+
