@@ -1,0 +1,62 @@
+# =========================
+# IDEs e Editores
+# =========================
+# VS Code
+.vscode/
+
+# PyCharm / IntelliJ IDEs
+.idea/
+*.iws
+*.iml
+*.ipr
+
+# =========================
+# Variáveis de Ambiente e Segurança
+# =========================
+# NUNCA suba suas senhas e credenciais para o Git!
+.env
+.env.*
+*.pem
+
+# =========================
+# Backend (Python / Django)
+# =========================
+# Arquivos compilados do Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Ambientes virtuais
+venv/
+env/
+.venv/
+
+# Arquivos de mídia e uploads locais (para não lotar o repositório com fotos de pratos)
+media/
+uploads/
+
+# Banco de dados SQLite (caso o Django crie um localmente para testes)
+db.sqlite3
+db.sqlite3-journal
+
+# =========================
+# Frontend (Angular / Node.js)
+# =========================
+# Dependências do Node (muito pesado, o Git não deve rastrear)
+node_modules/
+
+# Pastas de build e cache do Angular
+dist/
+.angular/
+tmp/
+out-tsc/
+bazel-out/
+
+# Relatórios de teste
+coverage/
+
+# =========================
+# Sistema Operacional
+# =========================
+.DS_Store
+Thumbs.db
