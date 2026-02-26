@@ -42,6 +42,9 @@ class Pais(BaseModel):
         max_length= 255,
         null= False
     )
+    def __str__(self) -> str:
+        dados = f"{self.painome} - {self.paiemail}"
+        return dados
 
 
 class Aluno(BaseModel):
@@ -76,6 +79,10 @@ class Aluno(BaseModel):
         on_delete = models.CASCADE
     )
 
+    def __str__(self) -> str:
+        dados = f"{self.alunome} - {self.alumatricula}"
+        return dados
+
 
 
 class Nutricionista(BaseModel):
@@ -98,6 +105,9 @@ class Nutricionista(BaseModel):
         null = False,
         max_length = 255
     )
+    def __str__(self) -> str:
+        dados = f'{self.nutnome} - {self.nutemail}'
+        return dados
 
 
 
@@ -111,7 +121,10 @@ class Ingrediente(BaseModel):
         db_column = 'ingtipo',
         null = False,
     )
-
+    def __str__(self) -> str:
+        dados = f'{self.ingtipo}'
+        return dados
+    
 class Refeicao(BaseModel):
     refcodigo = models.BigAutoField(
         db_column = 'refcodigo',
@@ -144,6 +157,10 @@ class Refeicao(BaseModel):
         Ingrediente,
         through= 'Refeicao_Ingrediente'
     )
+    def __str__(self) -> str:
+        dados = f'{self.refcodigo} - {self.refnome}'
+        return dados
+    
 
 class Alergia(BaseModel):
     alecodigo = models.BigAutoField(
@@ -164,6 +181,9 @@ class Alergia(BaseModel):
         Aluno,
         through= 'Restricoes_alunos'
     )
+    def __str__(self) -> str:
+        dados = f'{self.aletipo}'
+        return dados
 
 class Refeicao_Ingrediente(BaseModel):
     refingcodigo = models.BigAutoField(
@@ -181,6 +201,9 @@ class Refeicao_Ingrediente(BaseModel):
         db_column = 'refing_ingcodigo',
         on_delete = models.PROTECT
     )
+    def __str__(self) -> str:
+        dados = f'{self.refingrefcodigo.refnome} - {self.refingingcodigo.ingtipo}'
+        return dados
 
 
 class Restricoes_alimentares(BaseModel):
@@ -220,6 +243,9 @@ class Restricoes_Alunos(BaseModel):
         on_delete = models.PROTECT,
         related_name='aluno_restricao'
     )
+    def __str__(self) -> str:
+        dados = f'{self.resalu_alucodigo.alunome} - {self.resalu_alecodigo.aletipo}'
+        return dados
 
 class AlertaLog(BaseModel):
     logcodigo = models.BigAutoField(
@@ -250,6 +276,9 @@ class AlertaLog(BaseModel):
         null = True,
         default= False
     )
+    def __str__(self) -> str:
+        dados = f'{self.logalunocodigo.alunome} - {self.logalecodigo.aletipo} - {self.logrefcodigo.refnome} - Visualizado: {self.logvisualizacao}'
+        return dados
 
 class Cardapio(BaseModel):
     carcodigo = models.BigAutoField(
@@ -265,6 +294,9 @@ class Cardapio(BaseModel):
         Refeicao, 
         through='Cardapio_Refeicao'
         )
+    def __str__(self) -> str:
+        dados = f'{self.carcodigo} - {self.cardata.strftime("%Y-%m-%d")}'
+        return dados
 
 class Cardapio_refeicao(BaseModel):
     carrefcodigo = models.BigAutoField(
