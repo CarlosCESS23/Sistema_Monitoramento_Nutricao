@@ -21,21 +21,21 @@ services:
 
 # -----------------------Finalização do Banco de Dados-----------------------
 
-# Configuração do nosso Back-End Django
-# backend:
-#   build: ./backend 
-#   container_name: merenda_backend
-#   env_file:
-#     - ./backend/.env
-#   ports:
-#     - "9000:8000"
-#   volumes:
-#     -uploads:/app/uploads
-#   depends_on:
-#     db:
-#       condition: service_healthy
-#   restart:
-#     - unless-stopped
+#Configuração do nosso Back-End Django
+  backend:
+    build: ./backend
+    container_name: merenda_backend
+    env_file:
+      - ./backend/.env
+    ports:
+      - "9000:8000"
+    volumes:
+      -uploads:/app/uploads
+    depends_on:
+      db:
+        condition: service_healthy
+    restart:
+      - unless-stopped
 
 volumes:
   postgres_data:
