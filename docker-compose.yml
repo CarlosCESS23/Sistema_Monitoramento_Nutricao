@@ -30,13 +30,12 @@ services:
     ports:
       - "9000:8000"
     volumes:
-      -uploads:/app/uploads
+      - uploads:/app/uploads
     depends_on:
       db:
         condition: service_healthy
-    restart:
-      - unless-stopped
+    restart: unless-stopped
 
 volumes:
   postgres_data:
-
+  uploads:
