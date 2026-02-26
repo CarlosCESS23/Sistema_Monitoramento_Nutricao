@@ -144,34 +144,31 @@ class CardapioViewSet(viewsets.ModelViewSet):
 
     def perform_update(self, serializer):
         cardapio = serializer.save()
-        # Deleta alertas antigos e regenera — cardápio pode ter mudado
+        # Correção 1: Caminho direto (AlertaLog -> Refeicao -> Cardapio)
         AlertaLog.objects.filter(
-            logrefcodigo__cardapio_refeicao__carcodigo=cardapio.carcodigo
+            logrefcodigo__cardapio__carcodigo=cardapio.carcodigo
         ).delete()
         self._gerar_alertas(cardapio)
 
     def _gerar_alertas(self, cardapio):
-        # 1. Pega todos os ingredientes das refeições desse cardápio
+        # Correção 2: Caminho direto (Ingrediente -> Refeicao -> Cardapio)
         ingredientes = Ingrediente.objects.filter(
-            refeicao_ingrediente__refingrefcodigo__cardapio_refeicao__carcodigo=cardapio.carcodigo
+            refeicao__cardapio__carcodigo=cardapio.carcodigo
         )
 
-        # 2. Descobre quais alergias estão ligadas a esses ingredientes
         alergias_presentes = Restricoes_alimentares.objects.filter(
             resali_ingcodigo__in=ingredientes
         ).values_list('resali_alicodigo', flat=True)
 
-        # 3. Pega os alunos que têm essas alergias
         restricoes = Restricoes_Alunos.objects.filter(
             resalu_alecodigo__in=alergias_presentes
         ).select_related('resalu_alucodigo', 'resalu_alecodigo')
 
-        # 4. Pega as refeições do cardápio para vincular no log
+        # Correção 3: Caminho direto (Refeicao -> Cardapio)
         refeicoes = Refeicao.objects.filter(
-            cardapio_refeicao__carcodigo=cardapio.carcodigo
+            cardapio__carcodigo=cardapio.carcodigo
         )
 
-        # 5. Gera um AlertaLog para cada combinação aluno + alergia + refeição
         alertas = []
         for restricao in restricoes:
             for refeicao in refeicoes:
@@ -182,10 +179,8 @@ class CardapioViewSet(viewsets.ModelViewSet):
                     logvisualizacao=False
                 ))
 
-        # bulk_create insere tudo de uma vez — muito mais performático
         AlertaLog.objects.bulk_create(alertas, ignore_conflicts=True)
 
-    # GET /cardapios/?data=2025-01-20 → cardápio de um dia específico
     def get_queryset(self):
         data = self.request.query_params.get('data')
         if data:

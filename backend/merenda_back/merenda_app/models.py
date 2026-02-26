@@ -37,6 +37,12 @@ class Pais(BaseModel):
         db_column = "paiemail",
         null = False
     )
+    paicpf = models.CharField(
+        db_column = "paicpf",
+        max_length = 14,
+        null = False,
+        unique = True
+    )
     paisenha = models.CharField(
         db_column = 'paisenha',
         max_length= 255,
@@ -57,6 +63,12 @@ class Aluno(BaseModel):
         db_column= "alunome",
         max_length=60,
         null = False,
+    )
+    alucpf = models.CharField(
+        db_column = "alucpf",
+        max_length = 14,
+        null = False,
+        unique = True
     )
     aluemail = models.EmailField(
         db_column = "aluemail",
@@ -95,6 +107,12 @@ class Nutricionista(BaseModel):
         db_column = 'nutnome',
         max_length = 60,
         null = False
+    )
+    nutcpf = models.CharField(
+        db_column = 'nutcpf',
+        max_length = 14,
+        null = False,
+        unique = True
     )
     nutemail = models.EmailField(
         db_column = "nutemail",
@@ -225,6 +243,9 @@ class Restricoes_alimentares(BaseModel):
         null = False,
         on_delete= models.CASCADE
     )
+    def __str__(self) -> str:
+        dados = f'{self.resali_alicodigo.aletipo} - {self.resali_ingcodigo.ingtipo}'
+        return dados
 
 class Restricoes_Alunos(BaseModel):
     resalu_codigo = models.BigAutoField(
@@ -292,7 +313,7 @@ class Cardapio(BaseModel):
     )
     carrefeicoes = models.ManyToManyField(
         Refeicao, 
-        through='Cardapio_Refeicao'
+        through='Cardapio_refeicao'
         )
     def __str__(self) -> str:
         dados = f'{self.carcodigo} - {self.cardata.strftime("%Y-%m-%d")}'
@@ -314,6 +335,9 @@ class Cardapio_refeicao(BaseModel):
         db_column = 'carref_carcodigo',
         on_delete = models.PROTECT
     )
+    def __str__(self) -> str:
+        dados = f'{self.carref_carcodigo.cardata.strftime("%Y-%m-%d")} - {self.carref_refcodigo.refnome}'
+        return dados
 
 
 
