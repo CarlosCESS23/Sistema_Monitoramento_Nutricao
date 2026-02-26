@@ -37,7 +37,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'merenda_app'
+    'merenda_app',
+    'rest_framework', # Obrigatoriamente, temos que colocar o rest_framework
 ]
 
 MIDDLEWARE = [
