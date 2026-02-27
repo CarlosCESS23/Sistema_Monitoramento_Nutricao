@@ -1,13 +1,14 @@
 import { TestBed } from '@angular/core/testing';
 
-import { AlunoServices } from './aluno-services';
+// ✅ FIX: nome correto da classe (AlunoService) e caminho correto do arquivo (./aluno)
+import { AlunoService } from './aluno';
 
-describe('AlunoServices', () => {
-  let service: AlunoServices;
+describe('AlunoService', () => {
+  let service: AlunoService;
 
   beforeEach(() => {
     TestBed.configureTestingModule({});
-    service = TestBed.inject(AlunoServices);
+    service = TestBed.inject(AlunoService);
   });
 
   it('should be created', () => {

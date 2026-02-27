@@ -1,6 +1,7 @@
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from .models import (
     Aluno, Alergia, Refeicao, AlertaLog, Cardapio, Cardapio_refeicao,
     Restricoes_Alunos, Refeicao_Ingrediente, Restricoes_alimentares,
@@ -18,6 +19,12 @@ from .serializers import (
 class PaisViewSet(viewsets.ModelViewSet):
     queryset = Pais.objects.all()
     serializer_class = PaisSerializer
+
+    # ✅ FIX: cadastro é rota pública, demais exigem token
+    def get_permissions(self):
+        if self.action == 'create':
+            return [AllowAny()]
+        return [IsAuthenticated()]
 
     # POST /pais/{id}/adicionar_filho/
     # Pai vincula um aluno já existente como filho
@@ -56,6 +63,12 @@ class PaisViewSet(viewsets.ModelViewSet):
 
 class AlunoViewSet(viewsets.ModelViewSet):
     queryset = Aluno.objects.all()
+
+    # ✅ FIX: cadastro é rota pública, demais exigem token
+    def get_permissions(self):
+        if self.action == 'create':
+            return [AllowAny()]
+        return [IsAuthenticated()]
 
     def get_serializer_class(self):
         """
@@ -112,6 +125,12 @@ class AlunoViewSet(viewsets.ModelViewSet):
 class NutricionistaViewSet(viewsets.ModelViewSet):
     queryset = Nutricionista.objects.all()
     serializer_class = NutricionistaSerializer
+
+    # ✅ FIX: cadastro é rota pública, demais exigem token
+    def get_permissions(self):
+        if self.action == 'create':
+            return [AllowAny()]
+        return [IsAuthenticated()]
 
 
 class IngredienteViewSet(viewsets.ModelViewSet):
@@ -208,14 +227,16 @@ class CardapioViewSet(viewsets.ModelViewSet):
 
     def perform_update(self, serializer):
         cardapio = serializer.save()
+        # ✅ FIX: traversal correto — carref_carcodigo é o FK para Cardapio
         AlertaLog.objects.filter(
-            logrefcodigo__cardapio_refeicao__carcodigo=cardapio.carcodigo
+            logrefcodigo__cardapio_refeicao__carref_carcodigo=cardapio
         ).delete()
         self._gerar_alertas(cardapio)
 
     def _gerar_alertas(self, cardapio):
+        # ✅ FIX: traversal correto — carref_carcodigo é o FK de Cardapio_refeicao para Cardapio
         ingredientes = Ingrediente.objects.filter(
-            refeicao_ingrediente__refingrefcodigo__cardapio_refeicao__carcodigo=cardapio.carcodigo
+            refeicao_ingrediente__refingrefcodigo__cardapio_refeicao__carref_carcodigo=cardapio
         )
         alergias_presentes = Restricoes_alimentares.objects.filter(
             resali_ingcodigo__in=ingredientes
@@ -225,8 +246,9 @@ class CardapioViewSet(viewsets.ModelViewSet):
             resalu_alecodigo__in=alergias_presentes
         ).select_related('resalu_alucodigo', 'resalu_alecodigo')
 
+        # ✅ FIX: traversal correto para buscar refeições do cardápio
         refeicoes = Refeicao.objects.filter(
-            cardapio_refeicao__carcodigo=cardapio.carcodigo
+            cardapio_refeicao__carref_carcodigo=cardapio
         )
 
         alertas = []
