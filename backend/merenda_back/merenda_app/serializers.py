@@ -1,29 +1,52 @@
 from rest_framework import serializers
 from django.contrib.auth.hashers import make_password
 from .models import (
-    Aluno,
-    Alergia,
-    Refeicao,
-    AlertaLog,
-    Cardapio,
-    Cardapio_refeicao,
-    Restricoes_Alunos,
-    Refeicao_Ingrediente,
-    Restricoes_alimentares,
-    Ingrediente,
-    Nutricionista,
-    Pais,
+    Aluno, Alergia, Refeicao, AlertaLog, Cardapio, Cardapio_refeicao,
+    Restricoes_Alunos, Refeicao_Ingrediente, Restricoes_alimentares,
+    Ingrediente, Nutricionista, Pais,
 )
 
 
+# ─── Validador de CPF ──────────────────────────────────────────────────────────
+def validar_cpf(cpf: str) -> str:
+    """
+    Valida o formato e os dígitos verificadores do CPF.
+    Espera o formato 000.000.000-00.
+    """
+    import re
+    cpf_numeros = re.sub(r'\D', '', cpf)
+
+    if len(cpf_numeros) != 11:
+        raise serializers.ValidationError('CPF deve conter 11 dígitos.')
+
+    if cpf_numeros == cpf_numeros[0] * 11:
+        raise serializers.ValidationError('CPF inválido.')
+
+    # Valida 1º dígito verificador
+    soma = sum(int(cpf_numeros[i]) * (10 - i) for i in range(9))
+    digito1 = (soma * 10 % 11) % 10
+    if digito1 != int(cpf_numeros[9]):
+        raise serializers.ValidationError('CPF inválido.')
+
+    # Valida 2º dígito verificador
+    soma = sum(int(cpf_numeros[i]) * (11 - i) for i in range(10))
+    digito2 = (soma * 10 % 11) % 10
+    if digito2 != int(cpf_numeros[10]):
+        raise serializers.ValidationError('CPF inválido.')
+
+    return cpf  # retorna formatado como veio (000.000.000-00)
+
+
+# ─── Pais ──────────────────────────────────────────────────────────────────────
 class PaisSerializer(serializers.ModelSerializer):
     class Meta:
         model = Pais
         fields = '__all__'
         read_only_fields = ['paicodigo', 'create_at', 'modified_at']
-        extra_kwargs = {
-            'paisenha': {'write_only': True}
-        }
+        extra_kwargs = {'paisenha': {'write_only': True}}
+
+    def validate_paicpf(self, value):
+        return validar_cpf(value)
 
     def create(self, validated_data):
         validated_data['paisenha'] = make_password(validated_data['paisenha'])
@@ -35,14 +58,39 @@ class PaisSerializer(serializers.ModelSerializer):
         return super().update(instance, validated_data)
 
 
+# ─── Aluno — Cadastro próprio (sem pai obrigatório) ───────────────────────────
+class AlunoCadastroSerializer(serializers.ModelSerializer):
+    """
+    Usado quando o ALUNO cria a própria conta.
+    O pai é opcional — pode ser vinculado depois.
+    """
+    class Meta:
+        model = Aluno
+        fields = ['alunome', 'aluemail', 'alusenha', 'alumatricula', 'alucpf']
+        extra_kwargs = {'alusenha': {'write_only': True}}
+
+    def validate_alucpf(self, value):
+        return validar_cpf(value)
+
+    def create(self, validated_data):
+        validated_data['alusenha'] = make_password(validated_data['alusenha'])
+        return super().create(validated_data)
+
+
+# ─── Aluno — Serializer completo (pai vinculando filho) ───────────────────────
 class AlunoSerializer(serializers.ModelSerializer):
+    """
+    Usado quando o PAI cria conta do filho ou para listagem completa.
+    O pai é enviado no corpo da requisição.
+    """
     class Meta:
         model = Aluno
         fields = '__all__'
         read_only_fields = ['alucodigo', 'create_at', 'modified_at']
-        extra_kwargs = {
-            'alusenha': {'write_only': True}
-        }
+        extra_kwargs = {'alusenha': {'write_only': True}}
+
+    def validate_alucpf(self, value):
+        return validar_cpf(value)
 
     def create(self, validated_data):
         validated_data['alusenha'] = make_password(validated_data['alusenha'])
@@ -60,14 +108,13 @@ class AlunoSerializer(serializers.ModelSerializer):
         return representation
 
 
+# ─── Nutricionista ─────────────────────────────────────────────────────────────
 class NutricionistaSerializer(serializers.ModelSerializer):
     class Meta:
         model = Nutricionista
         fields = '__all__'
         read_only_fields = ['nutcodigo', 'create_at', 'modified_at']
-        extra_kwargs = {
-            'nutsenha': {'write_only': True}
-        }
+        extra_kwargs = {'nutsenha': {'write_only': True}}
 
     def create(self, validated_data):
         validated_data['nutsenha'] = make_password(validated_data['nutsenha'])
@@ -79,6 +126,7 @@ class NutricionistaSerializer(serializers.ModelSerializer):
         return super().update(instance, validated_data)
 
 
+# ─── Ingrediente ───────────────────────────────────────────────────────────────
 class IngredienteSerializer(serializers.ModelSerializer):
     class Meta:
         model = Ingrediente
@@ -86,6 +134,7 @@ class IngredienteSerializer(serializers.ModelSerializer):
         read_only_fields = ['ingcodigo', 'create_at', 'modified_at']
 
 
+# ─── Refeição ──────────────────────────────────────────────────────────────────
 class RefeicaoSerializer(serializers.ModelSerializer):
     class Meta:
         model = Refeicao
@@ -99,6 +148,7 @@ class RefeicaoSerializer(serializers.ModelSerializer):
         return representation
 
 
+# ─── Alergia ───────────────────────────────────────────────────────────────────
 class AlergiaSerializer(serializers.ModelSerializer):
     class Meta:
         model = Alergia
@@ -106,6 +156,7 @@ class AlergiaSerializer(serializers.ModelSerializer):
         read_only_fields = ['alecodigo', 'create_at', 'modified_at']
 
 
+# ─── Refeição Ingrediente ──────────────────────────────────────────────────────
 class RefeicaoIngredienteSerializer(serializers.ModelSerializer):
     class Meta:
         model = Refeicao_Ingrediente
@@ -121,6 +172,7 @@ class RefeicaoIngredienteSerializer(serializers.ModelSerializer):
         return representation
 
 
+# ─── Restrições Alimentares ────────────────────────────────────────────────────
 class RestricoesAlimentaresSerializer(serializers.ModelSerializer):
     class Meta:
         model = Restricoes_alimentares
@@ -136,6 +188,7 @@ class RestricoesAlimentaresSerializer(serializers.ModelSerializer):
         return representation
 
 
+# ─── Restrições Alunos ─────────────────────────────────────────────────────────
 class RestricoesAlunosSerializer(serializers.ModelSerializer):
     class Meta:
         model = Restricoes_Alunos
@@ -151,6 +204,7 @@ class RestricoesAlunosSerializer(serializers.ModelSerializer):
         return representation
 
 
+# ─── Alerta Log ────────────────────────────────────────────────────────────────
 class AlertaLogSerializer(serializers.ModelSerializer):
     class Meta:
         model = AlertaLog
@@ -168,6 +222,7 @@ class AlertaLogSerializer(serializers.ModelSerializer):
         return representation
 
 
+# ─── Cardápio Refeição ─────────────────────────────────────────────────────────
 class CardapioRefeicaoSerializer(serializers.ModelSerializer):
     class Meta:
         model = Cardapio_refeicao
@@ -181,6 +236,7 @@ class CardapioRefeicaoSerializer(serializers.ModelSerializer):
         return representation
 
 
+# ─── Cardápio ──────────────────────────────────────────────────────────────────
 class CardapioSerializer(serializers.ModelSerializer):
     class Meta:
         model = Cardapio
@@ -189,7 +245,6 @@ class CardapioSerializer(serializers.ModelSerializer):
 
     def to_representation(self, instance):
         representation = super().to_representation(instance)
-        # Retorna todas as refeições do cardápio já detalhadas
         representation['refeicoes'] = CardapioRefeicaoSerializer(
             instance.cardapio_refeicao_set.all(), many=True
         ).data

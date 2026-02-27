@@ -2,32 +2,16 @@ from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from .models import (
-    Aluno,
-    Alergia,
-    Refeicao,
-    AlertaLog,
-    Cardapio,
-    Cardapio_refeicao,
-    Restricoes_Alunos,
-    Refeicao_Ingrediente,
-    Restricoes_alimentares,
-    Ingrediente,
-    Nutricionista,
-    Pais,
+    Aluno, Alergia, Refeicao, AlertaLog, Cardapio, Cardapio_refeicao,
+    Restricoes_Alunos, Refeicao_Ingrediente, Restricoes_alimentares,
+    Ingrediente, Nutricionista, Pais,
 )
 from .serializers import (
-    AlunoSerializer,
-    AlergiaSerializer,
-    RefeicaoSerializer,
-    AlertaLogSerializer,
-    CardapioSerializer,
-    CardapioRefeicaoSerializer,
-    RestricoesAlunosSerializer,
-    RefeicaoIngredienteSerializer,
-    RestricoesAlimentaresSerializer,
-    IngredienteSerializer,
-    NutricionistaSerializer,
-    PaisSerializer,
+    AlunoSerializer, AlunoCadastroSerializer, AlergiaSerializer,
+    RefeicaoSerializer, AlertaLogSerializer, CardapioSerializer,
+    CardapioRefeicaoSerializer, RestricoesAlunosSerializer,
+    RefeicaoIngredienteSerializer, RestricoesAlimentaresSerializer,
+    IngredienteSerializer, NutricionistaSerializer, PaisSerializer,
 )
 
 
@@ -35,10 +19,53 @@ class PaisViewSet(viewsets.ModelViewSet):
     queryset = Pais.objects.all()
     serializer_class = PaisSerializer
 
+    # POST /pais/{id}/adicionar_filho/
+    # Pai vincula um aluno já existente como filho
+    @action(detail=True, methods=['post'])
+    def adicionar_filho(self, request, pk=None):
+        pai = self.get_object()
+        aluno_id = request.data.get('aluno_id')
+
+        if not aluno_id:
+            return Response(
+                {'erro': 'aluno_id é obrigatório'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        try:
+            aluno = Aluno.objects.get(pk=aluno_id)
+        except Aluno.DoesNotExist:
+            return Response(
+                {'erro': 'Aluno não encontrado'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        if aluno.alupaicodigo is not None:
+            return Response(
+                {'erro': 'Aluno já possui um pai vinculado'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        aluno.alupaicodigo = pai
+        aluno.save()
+        return Response(
+            {'status': f'Aluno {aluno.alunome} vinculado ao pai {pai.painome} com sucesso'},
+            status=status.HTTP_200_OK
+        )
+
 
 class AlunoViewSet(viewsets.ModelViewSet):
     queryset = Aluno.objects.all()
-    serializer_class = AlunoSerializer
+
+    def get_serializer_class(self):
+        """
+        Escolhe o serializer correto dependendo da ação:
+        - create → AlunoCadastroSerializer (aluno criando conta própria, pai opcional)
+        - demais → AlunoSerializer (completo, com detalhes do pai)
+        """
+        if self.action == 'create':
+            return AlunoCadastroSerializer
+        return AlunoSerializer
 
     def get_queryset(self):
         # /alunos/?pai=3 → retorna só os filhos daquele pai
@@ -46,6 +73,40 @@ class AlunoViewSet(viewsets.ModelViewSet):
         if pai_id:
             return Aluno.objects.filter(alupaicodigo=pai_id)
         return super().get_queryset()
+
+    # PATCH /alunos/{id}/vincular_pai/
+    # Aluno vincula o próprio pai depois de já ter criado conta
+    @action(detail=True, methods=['patch'])
+    def vincular_pai(self, request, pk=None):
+        aluno = self.get_object()
+        pai_id = request.data.get('pai_id')
+
+        if not pai_id:
+            return Response(
+                {'erro': 'pai_id é obrigatório'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        try:
+            pai = Pais.objects.get(pk=pai_id)
+        except Pais.DoesNotExist:
+            return Response(
+                {'erro': 'Pai não encontrado'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        if aluno.alupaicodigo is not None:
+            return Response(
+                {'erro': 'Aluno já possui um pai vinculado'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        aluno.alupaicodigo = pai
+        aluno.save()
+        return Response(
+            {'status': f'Pai {pai.painome} vinculado ao aluno {aluno.alunome} com sucesso'},
+            status=status.HTTP_200_OK
+        )
 
 
 class NutricionistaViewSet(viewsets.ModelViewSet):
@@ -63,7 +124,6 @@ class RefeicaoViewSet(viewsets.ModelViewSet):
     serializer_class = RefeicaoSerializer
 
     def get_queryset(self):
-        # /refeicoes/?nutricionista=2 → refeições de um nutricionista específico
         nut_id = self.request.query_params.get('nutricionista')
         if nut_id:
             return Refeicao.objects.filter(refnutcodigo=nut_id)
@@ -80,7 +140,6 @@ class RefeicaoIngredienteViewSet(viewsets.ModelViewSet):
     serializer_class = RefeicaoIngredienteSerializer
 
     def get_queryset(self):
-        # /refeicao-ingredientes/?refeicao=1 → ingredientes de uma refeição
         ref_id = self.request.query_params.get('refeicao')
         if ref_id:
             return Refeicao_Ingrediente.objects.filter(refingrefcodigo=ref_id)
@@ -97,7 +156,6 @@ class RestricoesAlunosViewSet(viewsets.ModelViewSet):
     serializer_class = RestricoesAlunosSerializer
 
     def get_queryset(self):
-        # /restricoes-alunos/?aluno=5 → restrições de um aluno específico
         aluno_id = self.request.query_params.get('aluno')
         if aluno_id:
             return Restricoes_Alunos.objects.filter(resalu_alucodigo=aluno_id)
@@ -109,8 +167,6 @@ class AlertaLogViewSet(viewsets.ModelViewSet):
     serializer_class = AlertaLogSerializer
 
     def get_queryset(self):
-        # /alertas/?aluno=5             → alertas de um aluno
-        # /alertas/?aluno=5&visualizado=false → só os não visualizados
         aluno_id = self.request.query_params.get('aluno')
         visualizado = self.request.query_params.get('visualizado')
         qs = AlertaLog.objects.all()
@@ -120,13 +176,15 @@ class AlertaLogViewSet(viewsets.ModelViewSet):
             qs = qs.filter(logvisualizacao=visualizado.lower() == 'true')
         return qs
 
-    # PATCH /alertas/{id}/marcar_visualizado/ → pai marca o alerta como lido
     @action(detail=True, methods=['patch'])
     def marcar_visualizado(self, request, pk=None):
         alerta = self.get_object()
         alerta.logvisualizacao = True
         alerta.save()
-        return Response({'status': 'alerta marcado como visualizado'}, status=status.HTTP_200_OK)
+        return Response(
+            {'status': 'alerta marcado como visualizado'},
+            status=status.HTTP_200_OK
+        )
 
 
 class CardapioRefeicaoViewSet(viewsets.ModelViewSet):
@@ -138,24 +196,27 @@ class CardapioViewSet(viewsets.ModelViewSet):
     queryset = Cardapio.objects.all()
     serializer_class = CardapioSerializer
 
+    def get_queryset(self):
+        data = self.request.query_params.get('data')
+        if data:
+            return Cardapio.objects.filter(cardata__date=data)
+        return super().get_queryset()
+
     def perform_create(self, serializer):
         cardapio = serializer.save()
-        self._gerar_alertas(cardapio)  # dispara automaticamente após salvar
+        self._gerar_alertas(cardapio)
 
     def perform_update(self, serializer):
         cardapio = serializer.save()
-        # Correção 1: Caminho direto (AlertaLog -> Refeicao -> Cardapio)
         AlertaLog.objects.filter(
-            logrefcodigo__cardapio__carcodigo=cardapio.carcodigo
+            logrefcodigo__cardapio_refeicao__carcodigo=cardapio.carcodigo
         ).delete()
         self._gerar_alertas(cardapio)
 
     def _gerar_alertas(self, cardapio):
-        # Correção 2: Caminho direto (Ingrediente -> Refeicao -> Cardapio)
         ingredientes = Ingrediente.objects.filter(
-            refeicao__cardapio__carcodigo=cardapio.carcodigo
+            refeicao_ingrediente__refingrefcodigo__cardapio_refeicao__carcodigo=cardapio.carcodigo
         )
-
         alergias_presentes = Restricoes_alimentares.objects.filter(
             resali_ingcodigo__in=ingredientes
         ).values_list('resali_alicodigo', flat=True)
@@ -164,9 +225,8 @@ class CardapioViewSet(viewsets.ModelViewSet):
             resalu_alecodigo__in=alergias_presentes
         ).select_related('resalu_alucodigo', 'resalu_alecodigo')
 
-        # Correção 3: Caminho direto (Refeicao -> Cardapio)
         refeicoes = Refeicao.objects.filter(
-            cardapio__carcodigo=cardapio.carcodigo
+            cardapio_refeicao__carcodigo=cardapio.carcodigo
         )
 
         alertas = []
@@ -180,9 +240,3 @@ class CardapioViewSet(viewsets.ModelViewSet):
                 ))
 
         AlertaLog.objects.bulk_create(alertas, ignore_conflicts=True)
-
-    def get_queryset(self):
-        data = self.request.query_params.get('data')
-        if data:
-            return Cardapio.objects.filter(cardata__date=data)
-        return super().get_queryset()
