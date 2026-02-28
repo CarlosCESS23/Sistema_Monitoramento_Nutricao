@@ -16,8 +16,8 @@ export interface LoginPayload {
 
 // O que o Django retorna após o login bem-sucedido (JWT)
 export interface AuthResponse {
-  access: string;   // token de acesso (expira em 1h)
-  refresh: string;  // token de renovação (expira em 7 dias)
+  access: string; // token de acesso (expira em 1h)
+  refresh: string; // token de renovação (expira em 7 dias)
 }
 
 // O que guardamos no localStorage para saber quem está logado
@@ -34,7 +34,7 @@ export interface Pais {
   paicodigo: number;
   painome: string;
   paiemail: string;
-  paicpf: string;       // formato 000.000.000-00
+  paicpf: string; // formato 000.000.000-00
   active: boolean;
   create_at?: string;
   modified_at?: string;
@@ -56,9 +56,10 @@ export interface Aluno {
   alunome: string;
   aluemail: string;
   alumatricula: string;
+  aluidade: number;
   alucpf: string;
-  alupaicodigo?: number | null;         // opcional — aluno pode não ter pai vinculado
-  alupaicodigo_detalhes?: Pais | null;  // detalhes do pai quando retornados pela API
+  alupaicodigo?: number | null; // opcional — aluno pode não ter pai vinculado
+  alupaicodigo_detalhes?: Pais | null; // detalhes do pai quando retornados pela API
   active: boolean;
   create_at?: string;
   modified_at?: string;
@@ -70,6 +71,7 @@ export interface CriarAlunoPayload {
   aluemail: string;
   alusenha: string;
   alumatricula: string;
+  aluidade: number;
   alucpf: string;
 }
 
@@ -123,7 +125,7 @@ export interface Refeicao {
 
 export interface Cardapio {
   carcodigo: number;
-  cardata: string;    // ISO 8601: "2025-01-20T00:00:00Z"
+  cardata: string; // ISO 8601: "2025-01-20T00:00:00Z"
   refeicoes?: Refeicao[];
   active: boolean;
 }

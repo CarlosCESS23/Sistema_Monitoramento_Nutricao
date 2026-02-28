@@ -1,0 +1,295 @@
+<div class="min-h-screen bg-gray-50 font-sans">
+
+  <header class="bg-white border-b border-gray-100 px-6 py-4 flex items-center justify-between sticky top-0 z-30 shadow-sm">
+    <div class="flex items-center gap-3">
+      <div class="w-9 h-9 rounded-xl flex items-center justify-center" style="background:#3BA882">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+        </svg>
+      </div>
+      <div>
+        <p class="font-bold text-gray-800 leading-tight">MerendaSegura</p>
+        <p class="text-xs text-gray-400">Painel do Nutricionista</p>
+      </div>
+    </div>
+
+    <div class="flex items-center gap-4">
+      <span class="text-sm text-gray-600">Olá, <strong>{{ nutricionistaNome() }}</strong></span>
+      <button (click)="sair()" class="flex items-center gap-2 text-sm text-gray-500 hover:text-red-500 transition-colors px-3 py-2 rounded-lg hover:bg-red-50">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+        </svg>
+        Sair
+      </button>
+    </div>
+  </header>
+
+  <div class="bg-white border-b border-gray-100 px-6">
+    <div class="flex gap-1">
+      @for (aba of [
+        { id: 'dashboard', label: 'Visão Geral', icon: 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z' },
+        { id: 'refeicoes', label: 'Refeições', icon: 'M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253' },
+        { id: 'cardapio', label: 'Cardápio Semanal', icon: 'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z' }
+      ]; track aba.id) {
+        <button
+          (click)="selecionarAba(aba.id)"
+          [class]="abaSelecionada() === aba.id
+            ? 'flex items-center gap-2 px-4 py-4 text-sm font-semibold border-b-2 border-emerald-500 text-emerald-600 transition-colors'
+            : 'flex items-center gap-2 px-4 py-4 text-sm font-medium text-gray-500 hover:text-gray-700 border-b-2 border-transparent transition-colors'">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" [attr.d]="aba.icon"/>
+          </svg>
+          {{ aba.label }}
+        </button>
+      }
+    </div>
+  </div>
+
+  @if (carregando()) {
+    <div class="flex items-center justify-center h-64">
+      <div class="flex flex-col items-center gap-3">
+        <div class="w-10 h-10 border-4 border-emerald-200 border-t-emerald-500 rounded-full animate-spin"></div>
+        <p class="text-sm text-gray-500">Carregando dados...</p>
+      </div>
+    </div>
+  }
+
+  @if (!carregando() && abaSelecionada() === 'dashboard') {
+    <main class="p-6 max-w-7xl mx-auto">
+      <div class="grid grid-cols-3 gap-4 mb-6">
+        <div class="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm flex items-center gap-4">
+          <div class="w-12 h-12 rounded-xl bg-emerald-50 flex items-center justify-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+          </div>
+          <div>
+            <p class="text-3xl font-bold text-gray-800">{{ totalAlunos() }}</p>
+            <p class="text-sm text-gray-500">Total de alunos</p>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm flex items-center gap-4">
+          <div class="w-12 h-12 rounded-xl bg-amber-50 flex items-center justify-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+          </div>
+          <div>
+            <p class="text-3xl font-bold text-gray-800">{{ totalComAlergias() }}</p>
+            <p class="text-sm text-gray-500">Com alergias</p>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm flex items-center gap-4">
+          <div class="w-12 h-12 rounded-xl bg-purple-50 flex items-center justify-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-purple-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+          </div>
+          <div>
+            <p class="text-3xl font-bold text-gray-800">{{ totalTiposAlergias() }}</p>
+            <p class="text-sm text-gray-500">Tipos de alergias</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-2 gap-4">
+        <div class="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm">
+          <h2 class="font-semibold text-gray-800 mb-4">Distribuição de Alergias</h2>
+          @if (alergiaStats().length === 0) {
+            <div class="flex flex-col items-center justify-center h-40 text-gray-400"><p class="text-sm">Nenhuma alergia registrada</p></div>
+          }
+          <div class="space-y-3">
+            @for (stat of alergiaStats(); track stat.tipo) {
+              <div class="flex items-center gap-3">
+                <span class="text-sm text-gray-600 w-24 text-right shrink-0">{{ stat.tipo }}</span>
+                <div class="flex-1 bg-gray-100 rounded-full h-6 overflow-hidden">
+                  <div class="h-full rounded-full flex items-center px-2 transition-all duration-700" [style.width.%]="(stat.total / maxAlergiaTotal()) * 100" [style.background]="stat.cor"></div>
+                </div>
+                <span class="text-sm font-semibold text-gray-700 w-5 shrink-0">{{ stat.total }}</span>
+              </div>
+            }
+          </div>
+        </div>
+
+        <div class="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm flex flex-col">
+          <h2 class="font-semibold text-gray-800 mb-3">Busca Rápida de Alunos</h2>
+          <div class="relative mb-3">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+            <input type="text" [ngModel]="termoBusca()" (ngModelChange)="termoBusca.set($event)" placeholder="Buscar aluno ou matrícula..." class="w-full pl-9 pr-4 py-2.5 border border-gray-200 rounded-xl text-sm outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100 transition-all"/>
+          </div>
+          <div class="flex-1 overflow-y-auto space-y-2 max-h-80 pr-1">
+            @for (aluno of alunosFiltrados(); track aluno.alucodigo) {
+              <div class="flex items-center justify-between p-3 rounded-xl border border-gray-100 hover:border-emerald-200 hover:bg-emerald-50/30 transition-all">
+                <div>
+                  <p class="text-sm font-semibold text-gray-800">{{ aluno.alunome }}</p>
+                  <p class="text-xs text-gray-400">{{ aluno.alumatricula }}</p>
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+    </main>
+  }
+
+  @if (!carregando() && abaSelecionada() === 'refeicoes') {
+    <main class="p-6 max-w-7xl mx-auto">
+      <div class="flex items-center justify-between mb-5">
+        <div>
+          <h2 class="text-xl font-bold text-gray-800">Cardápio de Refeições</h2>
+          <p class="text-sm text-gray-500">Cadastre e gerencie as opções de merenda disponíveis.</p>
+        </div>
+        <button (click)="abrirModalNovaRefeicao()" class="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-white transition-all hover:opacity-90 active:scale-95" style="background:#3BA882">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+          Nova Refeição
+        </button>
+      </div>
+
+      <div class="grid grid-cols-3 gap-4">
+        @for (ref of refeicoes(); track ref.refcodigo) {
+          <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden hover:shadow-md transition-shadow">
+            @if (urlImagem(ref)) {
+              <img [src]="urlImagem(ref)" [alt]="ref.refnome" class="w-full h-36 object-cover"/>
+            } @else {
+              <div class="w-full h-36 bg-gradient-to-br from-emerald-50 to-teal-100 flex items-center justify-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-12 h-12 text-emerald-200" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+              </div>
+            }
+            <div class="p-4">
+              <h3 class="font-semibold text-gray-800 mb-2">{{ ref.refnome }}</h3>
+              <div class="grid grid-cols-3 gap-2 mb-3">
+                <div class="text-center p-2 rounded-lg bg-orange-50"><p class="text-xs text-orange-400 font-medium">Calorias</p><p class="text-sm font-bold text-orange-600">{{ ref.refcalorias }}</p></div>
+                <div class="text-center p-2 rounded-lg bg-blue-50"><p class="text-xs text-blue-400 font-medium">Proteína</p><p class="text-sm font-bold text-blue-600">{{ ref.refproteina }}g</p></div>
+                <div class="text-center p-2 rounded-lg bg-yellow-50"><p class="text-xs text-yellow-500 font-medium">Carboidr.</p><p class="text-sm font-bold text-yellow-600">{{ ref.refcarboidrato }}g</p></div>
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+    </main>
+  }
+
+  @if (!carregando() && abaSelecionada() === 'cardapio') {
+    <main class="p-6 max-w-7xl mx-auto">
+      <div class="flex items-center justify-between mb-5">
+        <div>
+          <h2 class="text-xl font-bold text-gray-800">Organizar Cardápio da Semana</h2>
+          <p class="text-sm text-gray-500">Defina o que será servido a cada dia. Os pais serão notificados automaticamente!</p>
+        </div>
+        <input type="week" [ngModel]="semanaAtual()" (ngModelChange)="semanaAtual.set($event)"
+          class="px-4 py-2 border border-gray-200 rounded-xl text-sm outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100 transition-all cursor-pointer font-medium"/>
+      </div>
+
+      <div class="grid grid-cols-5 gap-3">
+        @for (dia of diasDaSemanaAtual(); track dia.data) {
+          <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden flex flex-col min-h-[16rem] group">
+            
+            <div class="px-4 py-3 border-b border-gray-50 flex justify-between items-center transition-colors" style="background:#3BA882">
+              <div>
+                <p class="text-sm font-bold text-white">{{ dia.diaSemana }}</p>
+                <p class="text-xs text-emerald-100">{{ formatarData(dia.data) }}</p>
+              </div>
+              <button (click)="abrirModalCardapio(dia)" title="Gerenciar dia"
+                class="p-1.5 bg-white/20 hover:bg-white/40 rounded-lg text-white transition-all transform active:scale-95">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/>
+                </svg>
+              </button>
+            </div>
+
+            <div class="p-3 space-y-2 flex-1 bg-gray-50/50">
+              @if (getRefeicoesDoDia(dia.data).length > 0) {
+                @for (ref of getRefeicoesDoDia(dia.data); track ref.refcodigo) {
+                  <div class="p-2.5 rounded-xl bg-white border border-gray-100 shadow-sm">
+                    <p class="text-xs font-bold text-gray-800 leading-tight mb-1">{{ ref.refnome }}</p>
+                    <p class="text-[10px] text-gray-400 font-medium">{{ ref.refcalorias }} kcal</p>
+                  </div>
+                }
+              } @else {
+                <div class="flex flex-col items-center justify-center h-full text-gray-300">
+                  <p class="text-xs font-medium">Dia vazio</p>
+                </div>
+              }
+            </div>
+            
+            <button (click)="abrirModalCardapio(dia)" class="w-full py-2 text-xs font-semibold text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 transition-colors border-t border-gray-100">
+              + Editar Dia
+            </button>
+          </div>
+        }
+      </div>
+    </main>
+  }
+
+</div>
+
+@if (modalCardapioAberto()) {
+  <div class="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg">
+      
+      <div class="flex items-center justify-between p-6 border-b border-gray-100">
+        <div>
+          <h3 class="text-lg font-bold text-gray-800">Cardápio de {{ diaEditando()?.diaSemana }}</h3>
+          <p class="text-sm text-gray-500">{{ formatarData(diaEditando()?.data || '') }}</p>
+        </div>
+        <button (click)="fecharModalCardapio()" class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 text-gray-400 transition-colors">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+
+      <div class="p-6">
+        <p class="text-sm text-gray-500 mb-4 font-medium">Selecione as refeições que serão servidas neste dia:</p>
+
+        @if (refeicoes().length === 0) {
+          <div class="p-5 bg-gray-50 rounded-xl text-center border border-gray-200">
+            <p class="text-sm font-semibold text-gray-600">Nenhuma refeição disponível.</p>
+            <p class="text-xs text-gray-500 mt-1">Vá até a aba "Refeições" para cadastrar o cardápio base.</p>
+          </div>
+        } @else {
+          <div class="flex flex-col gap-2.5 max-h-80 overflow-y-auto pr-2">
+            @for (ref of refeicoes(); track ref.refcodigo) {
+              
+              <div (click)="toggleRefCardapio(ref.refcodigo)"
+                class="flex items-center gap-4 p-3.5 rounded-xl border-2 cursor-pointer transition-all"
+                [class]="refsSelecionadas().has(ref.refcodigo) ? 'border-emerald-500 bg-emerald-50' : 'border-transparent bg-gray-50 hover:bg-gray-100 hover:border-gray-200'">
+                
+                <div class="w-5 h-5 rounded flex items-center justify-center border transition-colors shrink-0"
+                  [class]="refsSelecionadas().has(ref.refcodigo) ? 'bg-emerald-500 border-emerald-500' : 'bg-white border-gray-300'">
+                  @if (refsSelecionadas().has(ref.refcodigo)) {
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/>
+                    </svg>
+                  }
+                </div>
+
+                <div class="flex-1">
+                  <p class="text-sm font-bold" [class]="refsSelecionadas().has(ref.refcodigo) ? 'text-emerald-800' : 'text-gray-700'">{{ ref.refnome }}</p>
+                  <div class="flex gap-3 mt-0.5">
+                    <span class="text-xs font-medium text-orange-500">{{ ref.refcalorias }} kcal</span>
+                    <span class="text-xs font-medium text-blue-500">{{ ref.refproteina }}g ptn</span>
+                  </div>
+                </div>
+              </div>
+
+            }
+          </div>
+        }
+      </div>
+
+      <div class="p-6 pt-0 flex gap-3 mt-2">
+        <button (click)="fecharModalCardapio()" class="flex-1 py-3 rounded-xl border border-gray-200 text-sm font-bold text-gray-600 hover:bg-gray-50 transition-all">
+          Cancelar
+        </button>
+        <button (click)="salvarCardapioDia()" [disabled]="salvandoCardapio() || refeicoes().length === 0"
+          class="flex-1 py-3 rounded-xl text-sm font-bold text-white transition-all hover:opacity-90 active:scale-95 disabled:opacity-50 flex items-center justify-center gap-2 shadow-md"
+          style="background:#3BA882">
+          @if (salvandoCardapio()) {
+            <div class="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+            Salvando...
+          } @else {
+            Salvar no Cardápio
+          }
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+@if (modalRefeicaoAberto()) {
+   }
