@@ -234,13 +234,20 @@ class CardapioViewSet(viewsets.ModelViewSet):
         self._gerar_alertas(cardapio)
 
     def _gerar_alertas(self, cardapio):
-        # ✅ FIX: traversal correto — carref_carcodigo é o FK de Cardapio_refeicao para Cardapio
+        # Alergias vindas dos ingredientes da refeição
         ingredientes = Ingrediente.objects.filter(
             refeicao_ingrediente__refingrefcodigo__cardapio_refeicao__carref_carcodigo=cardapio
         )
-        alergias_presentes = Restricoes_alimentares.objects.filter(
+        alergias_dos_ingredientes = Restricoes_alimentares.objects.filter(
             resali_ingcodigo__in=ingredientes
         ).values_list('resali_alicodigo', flat=True)
+
+        # Alergias associadas diretamente à refeição (novo campo refalergias)
+        alergias_diretas = Alergia.objects.filter(
+            refeicoes__cardapio_refeicao__carref_carcodigo=cardapio
+        ).values_list('alecodigo', flat=True)
+
+        alergias_presentes = set(list(alergias_dos_ingredientes) + list(alergias_diretas))
 
         restricoes = Restricoes_Alunos.objects.filter(
             resalu_alecodigo__in=alergias_presentes

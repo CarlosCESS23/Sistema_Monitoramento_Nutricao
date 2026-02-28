@@ -125,9 +125,16 @@ AUTH_PASSWORD_VALIDATORS = [
 
 # ─── Internacionalização ──────────────────────────────────────────────────────
 LANGUAGE_CODE = 'pt-br'
-TIME_ZONE = 'America/Manaus'
+TIME_ZONE = 'America/Sao_Paulo'
 USE_I18N = True
 USE_TZ = True
 
 STATIC_URL = 'static/'
+
+# ─── Arquivos de Mídia (imagens de refeições) ──────────────────────────────────
+# Requer: pip install Pillow (já deve estar no requirements)
+import os
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'

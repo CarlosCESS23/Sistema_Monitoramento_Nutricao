@@ -12,10 +12,6 @@ class BaseModel(models.Model):
     modified_at = models.DateTimeField(db_column='dt_modified', auto_now=True, null=True)
     active = models.BooleanField(db_column='cs_active', null=False, default=True)
 
-    @property
-    def is_authenticated(self):
-        return True
-
     class Meta:
         abstract = True
 
@@ -43,26 +39,23 @@ class Aluno(BaseModel):
     aluemail = models.EmailField(db_column='aluemail', null=False)
     alusenha = models.CharField(db_column='alusenha', max_length=255, null=False)
     alumatricula = models.CharField(db_column='alumatricula', max_length=60, null=False)
-    aluidade = models.IntegerField(
-        db_column= 'aluidade',
-        null = False,
-
-    )
-      
     alucpf = models.CharField(
         db_column='alucpf',
         max_length=14,
         null=False,
-        unique=True,            # CPF único no sistema
+        unique=True,
         validators=[cpf_validator]
     )
-    # ← FK agora é OPCIONAL — aluno pode criar conta sem pai
+    
+    # ADICIONE ESTA LINHA:
+    aluidade = models.IntegerField(db_column='aluidade', null=False, default=0)
+
     alupaicodigo = models.ForeignKey(
         Pais,
         db_column='alupaicodigo',
-        null=True,              # opcional
+        null=True,
         blank=True,
-        on_delete=models.SET_NULL   # se pai for deletado, aluno não some
+        on_delete=models.SET_NULL
     )
 
     def __str__(self):
@@ -94,7 +87,14 @@ class Refeicao(BaseModel):
     refproteina = models.IntegerField(db_column='refproteina', null=False)
     refcarboidrato = models.IntegerField(db_column='refcarboidrato', null=False)
     refcalorias = models.IntegerField(db_column='refcalorias', null=False)
+    refimagem = models.ImageField(
+        upload_to='refeicoes/',
+        null=True,
+        blank=True,
+        db_column='refimagem'
+    )
     refingredientes = models.ManyToManyField(Ingrediente, through='Refeicao_Ingrediente')
+    refalergias = models.ManyToManyField('Alergia', blank=True, related_name='refeicoes')
 
     def __str__(self):
         return f'{self.refcodigo} - {self.refnome}'

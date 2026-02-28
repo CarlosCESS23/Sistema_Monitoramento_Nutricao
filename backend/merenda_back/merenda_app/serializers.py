@@ -66,8 +66,11 @@ class AlunoCadastroSerializer(serializers.ModelSerializer):
     """
     class Meta:
         model = Aluno
-        fields = ['alunome', 'aluemail', 'alusenha', 'alumatricula', 'alucpf']
-        extra_kwargs = {'alusenha': {'write_only': True}}
+        # Adicione 'aluidade' à lista de campos:
+        fields = ['alucodigo', 'alunome', 'aluemail', 'alusenha', 'alumatricula', 'alucpf', 'aluidade', 'alupaicodigo']
+        extra_kwargs = {
+            'alusenha': {'write_only': True}
+        }
 
     def validate_alucpf(self, value):
         return validar_cpf(value)
@@ -145,6 +148,12 @@ class RefeicaoSerializer(serializers.ModelSerializer):
         representation = super().to_representation(instance)
         if getattr(instance, 'refnutcodigo', None):
             representation['refnutcodigo_detalhes'] = NutricionistaSerializer(instance.refnutcodigo).data
+        
+        # O Django ManyToMany não traz lista de objs nativamente no ModelSerializer a menos que
+        # explicitly defined, mas podemos injetar no representation
+        if hasattr(instance, 'refalergias'):
+            representation['refalergias_detalhes'] = AlergiaSerializer(instance.refalergias.all(), many=True).data
+
         return representation
 
 
