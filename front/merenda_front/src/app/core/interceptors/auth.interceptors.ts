@@ -18,12 +18,25 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
     return next(req);
   }
 
+  // Não envie o token para rotas públicas de criação/login para
+  // evitar 401 do backend caso o token salvo esteja expirado
+  const isPublicRoute =
+    req.url.includes('/api/token/') ||
+    (req.method === 'POST' &&
+      (req.url.includes('/api/nutricionistas/') ||
+        req.url.includes('/api/alunos/') ||
+        req.url.includes('/api/pais/')));
+
+  if (isPublicRoute) {
+    return next(req);
+  }
+
   // "Clone" é necessário porque requisições HTTP são imutáveis no Angular.
   // Não podemos modificar a original — precisamos criar uma cópia com os headers novos.
   const reqAutenticada = req.clone({
     setHeaders: {
-      Authorization: `Bearer ${token}` // padrão JWT: "Bearer <token>"
-    }
+      Authorization: `Bearer ${token}`, // padrão JWT: "Bearer <token>"
+    },
   });
 
   return next(reqAutenticada);

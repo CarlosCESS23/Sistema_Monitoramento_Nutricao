@@ -12,7 +12,6 @@ import { TipoUsuario } from '../../../core/interfaces/models';
   templateUrl: './login-page.html',
 })
 export class LoginPage {
-
   // Signal controla qual card de perfil está selecionado
   // O valor inicial é 'pai' — primeiro card já ativo quando a página abre
   perfilSelecionado = signal<TipoUsuario>('pai');
@@ -29,7 +28,7 @@ export class LoginPage {
 
   constructor(
     private authService: AuthService,
-    private router: Router
+    private router: Router,
   ) {}
 
   // Chamado quando usuário clica em um dos 3 cards de perfil
@@ -40,12 +39,11 @@ export class LoginPage {
 
   // Texto dinâmico do botão conforme perfil selecionado
   get labelBotao(): string {
-    const labels: Record<TipoUsuario, string> = {
+    const labels: Record<string, string> = {
       pai: 'Entrar como Pai/Responsável',
-      aluno: 'Entrar como Aluno',
       nutricionista: 'Entrar como Nutricionista',
     };
-    return labels[this.perfilSelecionado()];
+    return labels[this.perfilSelecionado()] ?? 'Entrar';
   }
 
   // Chamado ao submeter o formulário
@@ -58,29 +56,30 @@ export class LoginPage {
     this.carregando.set(true);
     this.erro.set('');
 
-    this.authService.login({
-      email: this.email,
-      senha: this.senha,
-      tipo: this.perfilSelecionado(),
-    }).subscribe({
-      next: () => {
-        // Redireciona para o dashboard correto conforme o tipo
-        const rotas: Record<TipoUsuario, string> = {
-          pai: '/dashboard/pai',
-          aluno: '/dashboard/aluno',
-          nutricionista: '/dashboard/nutricionista',
-        };
-        this.router.navigate([rotas[this.perfilSelecionado()]]);
-      },
-      error: (err) => {
-        this.carregando.set(false);
-        // O Django retorna 401 para credenciais inválidas
-        if (err.status === 401) {
-          this.erro.set('Email ou senha incorretos.');
-        } else {
-          this.erro.set('Erro ao conectar com o servidor. Tente novamente.');
-        }
-      }
-    });
+    this.authService
+      .login({
+        email: this.email,
+        senha: this.senha,
+        tipo: this.perfilSelecionado(),
+      })
+      .subscribe({
+        next: () => {
+          // Redireciona para o dashboard correto conforme o tipo
+          const rotas: Record<string, string> = {
+            pai: '/dashboard/pai',
+            nutricionista: '/dashboard/nutricionista',
+          };
+          this.router.navigate([rotas[this.perfilSelecionado()] ?? '/login']);
+        },
+        error: (err) => {
+          this.carregando.set(false);
+          // O Django retorna 401 para credenciais inválidas
+          if (err.status === 401) {
+            this.erro.set('Email ou senha incorretos.');
+          } else {
+            this.erro.set('Erro ao conectar com o servidor. Tente novamente.');
+          }
+        },
+      });
   }
 }
