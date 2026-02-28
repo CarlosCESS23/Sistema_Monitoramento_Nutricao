@@ -12,6 +12,10 @@ class BaseModel(models.Model):
     modified_at = models.DateTimeField(db_column='dt_modified', auto_now=True, null=True)
     active = models.BooleanField(db_column='cs_active', null=False, default=True)
 
+    @property
+    def is_authenticated(self):
+        return True
+
     class Meta:
         abstract = True
 
@@ -39,6 +43,12 @@ class Aluno(BaseModel):
     aluemail = models.EmailField(db_column='aluemail', null=False)
     alusenha = models.CharField(db_column='alusenha', max_length=255, null=False)
     alumatricula = models.CharField(db_column='alumatricula', max_length=60, null=False)
+    aluidade = models.IntegerField(
+        db_column= 'aluidade',
+        null = False,
+
+    )
+      
     alucpf = models.CharField(
         db_column='alucpf',
         max_length=14,

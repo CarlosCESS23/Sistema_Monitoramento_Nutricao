@@ -51,7 +51,7 @@ CORS_ALLOW_CREDENTIALS = True   # permite envio de cookies/tokens nas requisiç�
 # ─── Django REST Framework + JWT ──────────────────────────────────────────────
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
+        'merenda_app.authentication.CustomJWTAuthentication',
     ),
     'DEFAULT_PERMISSION_CLASSES': (
         # Exige autenticação em todos os endpoints por padrão
