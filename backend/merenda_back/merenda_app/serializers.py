@@ -7,34 +7,12 @@ from .models import (
 )
 
 
-# ─── Validador de CPF ──────────────────────────────────────────────────────────
+# ─── Validador de CPF (desabilitado para demo) ─────────────────────────────────
 def validar_cpf(cpf: str) -> str:
     """
-    Valida o formato e os dígitos verificadores do CPF.
-    Espera o formato 000.000.000-00.
+    Validação desabilitada — aceita qualquer formato para facilitar dados de demo.
     """
-    import re
-    cpf_numeros = re.sub(r'\D', '', cpf)
-
-    if len(cpf_numeros) != 11:
-        raise serializers.ValidationError('CPF deve conter 11 dígitos.')
-
-    if cpf_numeros == cpf_numeros[0] * 11:
-        raise serializers.ValidationError('CPF inválido.')
-
-    # Valida 1º dígito verificador
-    soma = sum(int(cpf_numeros[i]) * (10 - i) for i in range(9))
-    digito1 = (soma * 10 % 11) % 10
-    if digito1 != int(cpf_numeros[9]):
-        raise serializers.ValidationError('CPF inválido.')
-
-    # Valida 2º dígito verificador
-    soma = sum(int(cpf_numeros[i]) * (11 - i) for i in range(10))
-    digito2 = (soma * 10 % 11) % 10
-    if digito2 != int(cpf_numeros[10]):
-        raise serializers.ValidationError('CPF inválido.')
-
-    return cpf  # retorna formatado como veio (000.000.000-00)
+    return cpf
 
 
 # ─── Pais ──────────────────────────────────────────────────────────────────────
@@ -44,9 +22,6 @@ class PaisSerializer(serializers.ModelSerializer):
         fields = '__all__'
         read_only_fields = ['paicodigo', 'create_at', 'modified_at']
         extra_kwargs = {'paisenha': {'write_only': True}}
-
-    def validate_paicpf(self, value):
-        return validar_cpf(value)
 
     def create(self, validated_data):
         validated_data['paisenha'] = make_password(validated_data['paisenha'])

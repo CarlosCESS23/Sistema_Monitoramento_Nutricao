@@ -73,9 +73,9 @@ SIMPLE_JWT = {
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': config('DB_NAME'),
-        'USER': config('DB_USER'),
-        'PASSWORD': config('DB_PASSWORD'),
+        'NAME': 
+        'USER': 
+        'PASSWORD': 
         'HOST': config('DB_HOST', default='db'),     # 'db' = nome do service no docker-compose
         'PORT': config('DB_PORT', default='5432'),
     }

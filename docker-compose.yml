@@ -1,4 +1,3 @@
-
 #Configuração do nosso banco de dados PostgreSQL
 services:
   db:
@@ -19,9 +18,9 @@ services:
       timeout: 5s
       retries: 5
 
-# -----------------------Finalização do Banco de Dados-----------------------
+  # -----------------------Finalização do Banco de Dados-----------------------
 
-#Configuração do nosso Back-End Django
+  #Configuração do nosso Back-End Django
   backend:
     build: ./backend
     container_name: merenda_backend
@@ -30,11 +29,13 @@ services:
     ports:
       - "9000:8000"
     volumes:
+      - ./backend:/app
       - uploads:/app/uploads
     depends_on:
       db:
         condition: service_healthy
     restart: unless-stopped
+
 
 volumes:
   postgres_data:

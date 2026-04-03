@@ -1,12 +1,12 @@
 <div class="min-h-screen bg-gray-50 font-sans">
   <header
-    class="bg-white border-b border-gray-100 px-6 py-4 flex items-center justify-between sticky top-0 z-30 shadow-sm"
+    class="bg-white border-b border-gray-100 px-3 sm:px-6 py-3 sm:py-4 flex items-center justify-between sticky top-0 z-30 shadow-sm"
   >
-    <div class="flex items-center gap-3">
-      <div class="w-9 h-9 rounded-xl flex items-center justify-center" style="background: #3ba882">
+    <div class="flex items-center gap-2 sm:gap-3 min-w-0">
+      <div class="w-8 h-8 sm:w-9 sm:h-9 shrink-0 rounded-xl flex items-center justify-center" style="background: #3ba882">
         <svg
           xmlns="http://www.w3.org/2000/svg"
-          class="w-5 h-5 text-white"
+          class="w-4 h-4 sm:w-5 sm:h-5 text-white"
           fill="none"
           viewBox="0 0 24 24"
           stroke="currentColor"
@@ -19,19 +19,19 @@
           />
         </svg>
       </div>
-      <div>
-        <p class="font-bold text-gray-800 leading-tight">MerendaSegura</p>
-        <p class="text-xs text-gray-400">Painel do Nutricionista</p>
+      <div class="min-w-0">
+        <p class="font-bold text-gray-800 leading-tight text-sm sm:text-base">MerendaSegura</p>
+        <p class="text-xs text-gray-400 hidden sm:block">Painel do Nutricionista</p>
       </div>
     </div>
 
-    <div class="flex items-center gap-4">
-      <span class="text-sm text-gray-600"
+    <div class="flex items-center gap-2 sm:gap-4">
+      <span class="text-xs sm:text-sm text-gray-600 hidden sm:block"
         >Olá, <strong>{{ nutricionistaNome() }}</strong></span
       >
       <button
         (click)="sair()"
-        class="flex items-center gap-2 text-sm text-gray-500 hover:text-red-500 transition-colors px-3 py-2 rounded-lg hover:bg-red-50"
+        class="flex items-center gap-1 sm:gap-2 text-sm text-gray-500 hover:text-red-500 transition-colors p-2 sm:px-3 sm:py-2 rounded-lg hover:bg-red-50"
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -47,13 +47,13 @@
             d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
           />
         </svg>
-        Sair
+        <span class="hidden sm:inline">Sair</span>
       </button>
     </div>
   </header>
 
-  <div class="bg-white border-b border-gray-100 px-6">
-    <div class="flex gap-1">
+  <div class="bg-white border-b border-gray-100 px-2 sm:px-6 overflow-x-auto">
+    <div class="flex gap-0 sm:gap-1 min-w-max sm:min-w-0">
       @for (
         aba of [
           {
@@ -78,8 +78,8 @@
           (click)="selecionarAba(aba.id)"
           [class]="
             abaSelecionada() === aba.id
-              ? 'flex items-center gap-2 px-4 py-4 text-sm font-semibold border-b-2 border-emerald-500 text-emerald-600 transition-colors'
-              : 'flex items-center gap-2 px-4 py-4 text-sm font-medium text-gray-500 hover:text-gray-700 border-b-2 border-transparent transition-colors'
+              ? 'flex items-center gap-1.5 px-3 sm:px-4 py-3 sm:py-4 text-xs sm:text-sm font-semibold border-b-2 border-emerald-500 text-emerald-600 transition-colors whitespace-nowrap'
+              : 'flex items-center gap-1.5 px-3 sm:px-4 py-3 sm:py-4 text-xs sm:text-sm font-medium text-gray-500 hover:text-gray-700 border-b-2 border-transparent transition-colors whitespace-nowrap'
           "
         >
           <svg
@@ -96,7 +96,7 @@
               [attr.d]="aba.icon"
             />
           </svg>
-          {{ aba.label }}
+          <span class="hidden sm:inline">{{ aba.label }}</span>
         </button>
       }
     </div>
@@ -114,8 +114,8 @@
   }
 
   @if (!carregando() && abaSelecionada() === 'dashboard') {
-    <main class="p-6 max-w-7xl mx-auto">
-      <div class="grid grid-cols-3 gap-4 mb-6">
+    <main class="p-3 sm:p-6 max-w-7xl mx-auto">
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 mb-4 sm:mb-6">
         <div
           class="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm flex items-center gap-4"
         >
@@ -192,7 +192,7 @@
         </div>
       </div>
 
-      <div class="grid grid-cols-2 gap-4">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div class="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm">
           <h2 class="font-semibold text-gray-800 mb-4">Distribuição de Alergias</h2>
           @if (alergiaStats().length === 0) {
@@ -291,7 +291,7 @@
         </button>
       </div>
 
-      <div class="grid grid-cols-3 gap-4">
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
         @for (ref of refeicoes(); track ref.refcodigo) {
           <div
             class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden hover:shadow-md transition-shadow"
@@ -320,7 +320,7 @@
             }
             <div class="p-4">
               <h3 class="font-semibold text-gray-800 mb-2">{{ ref.refnome }}</h3>
-              <div class="grid grid-cols-3 gap-2 mb-3">
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 mb-3">
                 <div class="text-center p-2 rounded-lg bg-orange-50">
                   <p class="text-xs text-orange-400 font-medium">Calorias</p>
                   <p class="text-sm font-bold text-orange-600">{{ ref.refcalorias }}</p>
@@ -358,7 +358,7 @@
         />
       </div>
 
-      <div class="grid grid-cols-5 gap-3">
+      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
         @for (dia of diasDaSemanaAtual(); track dia.data) {
           <div
             class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden flex flex-col min-h-[16rem] group"
@@ -666,7 +666,7 @@
         </div>
 
         <!-- Macronutrientes -->
-        <div class="grid grid-cols-3 gap-3">
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <div>
             <label class="block text-sm font-semibold text-gray-700 mb-1">Calorias (kcal)</label>
             <input
@@ -738,7 +738,7 @@
             Marque caso o prato possua traços ou ingredientes alergênicos que não estão listados
             acima.
           </p>
-          <div class="grid grid-cols-2 gap-3">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
             @for (aler of alergias(); track aler.alecodigo) {
               <label
                 class="flex items-center gap-3 p-3 rounded-xl border border-gray-200 bg-white cursor-pointer hover:border-rose-400 transition-all group"
